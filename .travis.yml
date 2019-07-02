@@ -1,0 +1,21 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t milanunion/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run milanunion/react-test npm run test
+
+after_success:
+  - docker build -t milanunion/multi-client ./client
+  - docker build -t milanunion/multi-nginx ./nginx
+  - docker build -t milanunion/multi-server ./server
+  - docker build -t milanunion/multi-worker ./worker
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  - docker push milanunion/multi-client
+  - docker push milanunion/multi-nginx
+  - docker push milanunion/multi-server
+  - docker push milanunion/multi-worker
+  
